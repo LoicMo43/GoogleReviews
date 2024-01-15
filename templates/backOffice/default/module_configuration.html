@@ -1,0 +1,49 @@
+<style>
+    input[type=number]
+    {
+        min-width:100px;
+    }
+</style>
+
+{block name="main-content"}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="general-block-decorator">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="tab-content">
+                            <div class="title">
+                                {intl l="Google Reviews configuration" d='googlereviews.bo.default'}
+                            </div>
+
+                            {form name="googlereviews_form_configuration_form"}
+                                <form method="POST" action="{url path="/admin/module/GoogleReviews/configuration"}" {form_enctype} >
+                                    {render_form_field field="success_url" value={url path='/admin/module/GoogleReviews'}}
+                                    {render_form_field field="error_url" value={url path='/admin/module/GoogleReviews'}}
+
+                                    {form_hidden_fields }
+
+                                    {if $form_error}
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="alert alert-danger">{$form_error_message}</div>
+                                            </div>
+                                        </div>
+                                    {/if}
+
+                                    <div class="col-md-12">
+                                        {render_form_field field='app_name'}
+                                        {render_form_field field='api_key'}
+                                        {render_form_field field='place_id'}
+                                        {render_form_field field='cache_duration'}
+                                    </div>
+                                    <button type="submit" class="btn btn-success" >{intl l="Save Configuration" d="googlereviews.bo.default"}</button>
+                                </form>
+                            {/form}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{/block}
