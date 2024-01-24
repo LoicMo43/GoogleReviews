@@ -12,22 +12,38 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GoogleApiService
 {
+    public const DETAIL_URL = GoogleReviews::GOOGLE_MAPS_API_URL . DS ."details/json";
+    public const FIND_PLACE_URL = GoogleReviews::GOOGLE_MAPS_API_URL . DS ."findplacefromtext/json";
+
+
     public function __construct(protected HttpClientInterface $client)
     {}
 
-    public function checkValidConfiguration(): ?array
+    /**
+     * Call API Google Maps Details
+     * Return the reviews
+     *
+     * @param string|null $location
+     * @param string $lang
+     * @param string $fields
+     * @return array|null
+     */
+    public function getDetails(string $location = null, string $lang = 'fr', string $fields = ""): ?array
     {
         $apiKey = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_API_KEY);
-        $location = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_PLACE_ID);
+
+        if ($fields !== "") {
+            $fields = "&fields=" . $fields;
+        }
 
         try {
             $response = $this->client->request(
                 'GET',
-                GoogleReviews::GOOGLE_PLACES_API_URL . $location . "?fields=id,displayName&key=" . $apiKey
+                self::DETAIL_URL . "?place_id=". $location . "&key=" . $apiKey . "&language=" . $lang . $fields
             );
 
             if ($response->getStatusCode() === 200) {
-                return $response->toArray();
+                return $response->toArray()['result'];
             }
 
         } catch (TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
@@ -37,31 +53,26 @@ class GoogleApiService
     }
 
     /**
-     * Call API Google Maps
-     * Return the reviews
+     * Call API Google Maps Find Place
+     * Return possible place_id(s) of the location
      *
-     * @param string|null $location
-     * @param string $lang
-     * @return array
+     * @param string $lat
+     * @param string $lng
+     * @param string $field
+     * @return array|null
      */
-    public function getReviews(string $location = null, string $lang = 'fr'): array
+    public function findPlaceId(string $lat, string $lng, string $field): ?array
     {
         $apiKey = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_API_KEY);
-
-        if ($location === null) {
-            $location = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_PLACE_ID);
-        }
 
         try {
             $response = $this->client->request(
                 'GET',
-                GoogleReviews::GOOGLE_MAPS_API_URL . "?place_id=". $location . "&key=" . $apiKey . "&language=" . $lang ."&fields=review"
+                self::FIND_PLACE_URL . "?input=" . $field. "&inputtype=textquery&locationbias=:radius@" . $lat . "," . $lng . "&key=" . $apiKey
             );
 
             if ($response->getStatusCode() === 200) {
-                $result = $response->toArray();
-
-                return $result['result']['reviews'];
+                return $response->toArray()['candidates'];
             }
         } catch (TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
         }

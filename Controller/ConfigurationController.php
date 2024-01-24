@@ -8,6 +8,7 @@ use GoogleReviews\GoogleReviews;
 use GoogleReviews\Service\GoogleApiService;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Admin\BaseAdminController;
@@ -19,7 +20,7 @@ use Thelia\Form\Exception\FormValidationException;
 class ConfigurationController extends BaseAdminController
 {
     #[Route('/configuration', name: 'configuration', methods: 'POST')]
-    public function saveConfiguration(GoogleApiService $service, ParserContext $parserContext): RedirectResponse|Response
+    public function saveConfiguration(RequestStack $requestStack, GoogleApiService $service, ParserContext $parserContext): RedirectResponse|Response
     {
         $form = $this->createForm(ConfigurationForm::getName());
         try {
@@ -29,15 +30,14 @@ class ConfigurationController extends BaseAdminController
             GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_PLACE_ID, $data["place_id"]);
             GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_CACHE_DURATION, $data["cache_duration"] ?? 10);
 
-            if (null === $content = $service->checkValidConfiguration()) {
+            $locale = $requestStack->getCurrentRequest()?->getLocale();
+
+            if (null === $content = $service->getDetails($data["place_id"], $locale, "name")) {
                 GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_APPLICATION_NAME, '');
-
-                $msg = Translator::getInstance()->trans('Configuration is not valid', [], GoogleReviews::DOMAIN_NAME);
-
-                throw new RuntimeException($msg);
+                throw new RuntimeException(Translator::getInstance()->trans('Configuration is not valid', [], GoogleReviews::DOMAIN_NAME));
             }
 
-            GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_APPLICATION_NAME, $content['displayName']['text']);
+            GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_APPLICATION_NAME, $content['name']);
 
             return $this->generateSuccessRedirect($form);
 

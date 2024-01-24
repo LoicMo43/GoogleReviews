@@ -37,3 +37,42 @@ composer require thelia/google-reviews-module:~1.0
 | $REVIEWER_NAME | author name   |
 | $REVIEW        | message       |
 | $SCORE         | minimum score |
+
+
+[google_places_loop]
+
+### Input arguments
+
+| Argument          | Description                        |
+|-------------------|------------------------------------|
+| **locale**        | locale code.(default 'fr_FR')      |
+| **place_id**      | override place_id parameter        |
+
+### Output arguments
+
+| Variable      | Description               |
+|---------------|---------------------------|
+| $ADDRESS      | address of the store      |
+| $PHONE_NUMBER | phone number of the store |
+| $LATITUDE     | latitude of the store     |
+| $LONGITUDE    | longitude of the store    |
+| $RATING       | rating                    |
+| $RATING_TOTAL | number of rating          |
+| $URL          | url of the store          |
+| $VICINITY     | vicinity                  |
+| $WEBSITE      | website of the store      |
+
+
+## Command
+
+To find your Google place ID easily with geographical coordinates and keyword
+```
+php Thelia module:GoogleReviews:getPlaceId lat lng keyword
+```
+
+## Documentations
+
+Google Maps API documentation is available at https://developers.google.com/maps/documentation/places/web-service?hl=fr
+
+API PLACE Details : https://developers.google.com/maps/documentation/places/web-service/details?hl=fr
+API PLACE Find Place : https://developers.google.com/maps/documentation/places/web-service/search-find-place?hl=fr
