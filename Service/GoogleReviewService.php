@@ -27,14 +27,14 @@ class GoogleReviewService
      */
     public function saveReviewJson(string $placeId, string $locale, \DateTime $date): array
     {
-        $reviews = $this->googleApiService->getReviews($placeId, $locale);
+        $reviews = $this->googleApiService->getDetails($placeId, $locale, "review");
 
-        if (!file_exists(self::GOOGLE_REVIEWS_PATH)) {
-            !mkdir($concurrentDirectory = self::GOOGLE_REVIEWS_PATH) && !is_dir($concurrentDirectory);
+        if (!is_dir(self::GOOGLE_REVIEWS_PATH) && !mkdir(self::GOOGLE_REVIEWS_PATH, 0775, true) && !is_dir(self::GOOGLE_REVIEWS_PATH)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', self::GOOGLE_REVIEWS_PATH));
         }
 
         $date->modify('+' . GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_CACHE_DURATION) . 'minutes');
-        GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_CACHE_FILE_TIMESTAMP . strtolower($placeId), $date->getTimestamp());
+        GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_CACHE_REVIEWS_FILE_TIMESTAMP . strtolower($placeId), $date->getTimestamp());
 
         file_put_contents(self::GOOGLE_REVIEWS_FILE . strtolower($placeId) . "_" . $locale .'.json', json_encode($reviews, JSON_THROW_ON_ERROR));
 
@@ -72,7 +72,7 @@ class GoogleReviewService
     public function getReviews(string $placeId, string $locale): array
     {
         $date = new \DateTime();
-        $timestampFile = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_CACHE_FILE_TIMESTAMP . strtolower($placeId));
+        $timestampFile = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_CACHE_REVIEWS_FILE_TIMESTAMP . strtolower($placeId));
 
         if ((!$reviews = $this->getReviewJson($placeId, $locale)) || $date->getTimestamp() >= $timestampFile) {
             $reviews = $this->saveReviewJson($placeId, $locale, $date);

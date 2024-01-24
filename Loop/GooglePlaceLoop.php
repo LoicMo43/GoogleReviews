@@ -3,7 +3,7 @@
 namespace GoogleReviews\Loop;
 
 use GoogleReviews\GoogleReviews;
-use GoogleReviews\Service\GoogleReviewService;
+use GoogleReviews\Service\GooglePlaceService;
 use Thelia\Core\Template\Element\ArraySearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
@@ -11,15 +11,9 @@ use Thelia\Core\Template\Element\LoopResultRow;
 use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 
-/**
- * @method getMinScore()
- * @method getCountReviews()
- * @method getLocale()
- * @method getPlaceId()
- */
-class GoogleReviewsLoop extends BaseLoop implements ArraySearchLoopInterface
+class GooglePlaceLoop extends BaseLoop implements ArraySearchLoopInterface
 {
-    public function __construct(protected GoogleReviewService $googleReviewService)
+    public function __construct(protected GooglePlaceService $googlePlaceService)
     {}
 
     public function parseResults(LoopResult $loopResult): LoopResult
@@ -27,9 +21,17 @@ class GoogleReviewsLoop extends BaseLoop implements ArraySearchLoopInterface
         foreach ($loopResult->getResultDataCollection() as $item) {
             $loopResultRow = new LoopResultRow();
 
-            $loopResultRow->set("REVIEWER_NAME", $item['reviewer_name']);
-            $loopResultRow->set("REVIEW", $item['review']);
-            $loopResultRow->set("SCORE", $item['score']);
+            $loopResultRow->set("ADDRESS", $item['formatted_address']);
+            $loopResultRow->set("PHONE_NUMBER", $item['formatted_phone_number']);
+            $loopResultRow->set("LATITUDE", $item['geometry']['location']['lat']);
+            $loopResultRow->set("LONGITUDE", $item['geometry']['location']['lng']);
+
+            $loopResultRow->set("NAME", $item['name']);
+            $loopResultRow->set("RATING", $item['rating']);
+            $loopResultRow->set("RATING_TOTAL", $item['user_ratings_total']);
+            $loopResultRow->set("URL", $item['url']);
+            $loopResultRow->set("VICINITY", $item['vicinity']);
+            $loopResultRow->set("WEBSITE", $item['website']);
 
             $loopResult->addRow($loopResultRow);
         }
@@ -41,30 +43,13 @@ class GoogleReviewsLoop extends BaseLoop implements ArraySearchLoopInterface
     {
         $items = [];
 
-        $minScore = $this->getMinScore();
-        $countReviews = $this->getCountReviews();
         $locale = $this->getLocale();
 
         if (null === $placeId = $this->getPlaceId()) {
             $placeId = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_PLACE_ID);
         }
 
-        $reviews = $this->googleReviewService->getReviews($placeId, $locale);
-
-        $i = 0;
-        foreach ($reviews as $review) {
-            if ($i >= $countReviews) {
-                break;
-            }
-
-            if ($review['rating'] >= $minScore) {
-                $items[] = [
-                    'reviewer_name' => $review['author_name'],
-                    'review' => $review['text'],
-                    'score' => $review['rating']
-                ];
-            }
-        }
+        $items[] = $this->googlePlaceService->getDetails($placeId, $locale);
 
         return $items;
     }
@@ -72,8 +57,6 @@ class GoogleReviewsLoop extends BaseLoop implements ArraySearchLoopInterface
     protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
-            Argument::createIntTypeArgument('min_score', 0),
-            Argument::createIntTypeArgument('count_reviews', 5),
             Argument::createAlphaNumStringTypeArgument('locale', 'fr_FR'),
             Argument::createAlphaNumStringTypeArgument('place_id')
         );
