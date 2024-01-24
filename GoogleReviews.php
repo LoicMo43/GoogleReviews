@@ -18,8 +18,7 @@ class GoogleReviews extends BaseModule
     public const GOOGLE_API_KEY = "googlereviews_api_key";
     public const GOOGLE_PLACE_ID = "googlereviews_place_id";
     public const GOOGLE_CACHE_DURATION = "googlereviews_cache_duration";
-    public const GOOGLE_CACHE_REVIEWS_FILE_TIMESTAMP = "googlereviews_reviews_cache_file_";
-    public const GOOGLE_CACHE_PLACES_FILE_TIMESTAMP = "googlereviews_places_cache_file_";
+    public const GOOGLE_CACHE_FILE_TIMESTAMP = "googlereviews_cache_file_";
 
     /*
      * You may now override BaseModuleInterface methods, such as:

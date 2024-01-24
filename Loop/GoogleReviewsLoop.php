@@ -3,7 +3,7 @@
 namespace GoogleReviews\Loop;
 
 use GoogleReviews\GoogleReviews;
-use GoogleReviews\Service\GoogleReviewService;
+use GoogleReviews\Service\GooglePlaceService;
 use Thelia\Core\Template\Element\ArraySearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
@@ -19,7 +19,7 @@ use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
  */
 class GoogleReviewsLoop extends BaseLoop implements ArraySearchLoopInterface
 {
-    public function __construct(protected GoogleReviewService $googleReviewService)
+    public function __construct(protected GooglePlaceService $googleReviewService)
     {}
 
     public function parseResults(LoopResult $loopResult): LoopResult
@@ -49,7 +49,7 @@ class GoogleReviewsLoop extends BaseLoop implements ArraySearchLoopInterface
             $placeId = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_PLACE_ID);
         }
 
-        $reviews = $this->googleReviewService->getReviews($placeId, $locale);
+        $reviews = $this->googleReviewService->getDetails($placeId, $locale)['reviews'];
 
         $i = 0;
         foreach ($reviews as $review) {

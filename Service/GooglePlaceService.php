@@ -7,7 +7,7 @@ use GoogleReviews\GoogleReviews;
 
 class GooglePlaceService
 {
-    public const GOOGLE_PlACES_PATH = THELIA_ROOT . 'public/google_places_details' . DS;
+    public const GOOGLE_PlACES_PATH = THELIA_ROOT . 'public/google_reviews' . DS;
     public const GOOGLE_PlACES_FILE = self::GOOGLE_PlACES_PATH . 'place_id_';
 
     public function __construct(protected GoogleApiService $googleApiService)
@@ -22,7 +22,7 @@ class GooglePlaceService
         }
 
         $date->modify('+' . GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_CACHE_DURATION) . 'minutes');
-        GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_CACHE_PLACES_FILE_TIMESTAMP . strtolower($placeId), $date->getTimestamp());
+        GoogleReviews::setConfigValue(GoogleReviews::GOOGLE_CACHE_FILE_TIMESTAMP . strtolower($placeId), $date->getTimestamp());
 
         file_put_contents(self::GOOGLE_PlACES_FILE . strtolower($placeId) . "_" . $locale .'.json', json_encode($details, JSON_THROW_ON_ERROR));
 
@@ -52,7 +52,7 @@ class GooglePlaceService
     public function getDetails(string $placeId, string $locale): array
     {
         $date = new \DateTime();
-        $timestampFile = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_CACHE_PLACES_FILE_TIMESTAMP . strtolower($placeId));
+        $timestampFile = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_CACHE_FILE_TIMESTAMP . strtolower($placeId));
 
         if ((!$reviews = $this->getDetailsJson($placeId, $locale)) || $date->getTimestamp() >= $timestampFile) {
             $reviews = $this->saveDetailsJson($placeId, $locale, $date);
