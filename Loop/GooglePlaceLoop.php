@@ -21,17 +21,17 @@ class GooglePlaceLoop extends BaseLoop implements ArraySearchLoopInterface
         foreach ($loopResult->getResultDataCollection() as $item) {
             $loopResultRow = new LoopResultRow();
 
-            $loopResultRow->set("ADDRESS", $item['formatted_address']);
-            $loopResultRow->set("PHONE_NUMBER", $item['formatted_phone_number']);
-            $loopResultRow->set("LATITUDE", $item['geometry']['location']['lat']);
-            $loopResultRow->set("LONGITUDE", $item['geometry']['location']['lng']);
+            $loopResultRow->set("ADDRESS", $item['formatted_address'] ?? "");
+            $loopResultRow->set("PHONE_NUMBER", $item['formatted_phone_number'] ?? "");
+            $loopResultRow->set("LATITUDE", $item['geometry']['location']['lat'] ?? "");
+            $loopResultRow->set("LONGITUDE", $item['geometry']['location']['lng'] ?? "");
 
-            $loopResultRow->set("NAME", $item['name']);
-            $loopResultRow->set("RATING", $item['rating']);
-            $loopResultRow->set("RATING_TOTAL", $item['user_ratings_total']);
-            $loopResultRow->set("URL", $item['url']);
-            $loopResultRow->set("VICINITY", $item['vicinity']);
-            $loopResultRow->set("WEBSITE", $item['website']);
+            $loopResultRow->set("NAME", $item['name'] ?? "");
+            $loopResultRow->set("RATING", $item['rating'] ?? 0);
+            $loopResultRow->set("RATING_TOTAL", $item['user_ratings_total'] ?? 0);
+            $loopResultRow->set("URL", $item['url'] ?? "");
+            $loopResultRow->set("VICINITY", $item['vicinity'] ?? "");
+            $loopResultRow->set("WEBSITE", $item['website'] ?? "");
 
             $loopResult->addRow($loopResultRow);
         }
