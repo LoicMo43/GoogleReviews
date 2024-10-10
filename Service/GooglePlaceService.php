@@ -13,7 +13,15 @@ class GooglePlaceService
     public function __construct(protected GoogleApiService $googleApiService)
     {}
 
-    public function saveDetailsJson(string $placeId, string $locale, \DateTime $date): array
+    /**
+     * @param string $placeId
+     * @param string $locale
+     * @param \DateTime $date
+     * @return array|null
+     * @throws \DateMalformedStringException
+     * @throws \JsonException
+     */
+    public function saveDetailsJson(string $placeId, string $locale, \DateTime $date): ?array
     {
         $details = $this->googleApiService->getDetails($placeId, $locale);
 
@@ -29,7 +37,12 @@ class GooglePlaceService
         return $details;
     }
 
-    public function getDetailsJson(string $placeId, string $locale): array|bool
+    /**
+     * @param string $placeId
+     * @param string $locale
+     * @return array|bool|null
+     */
+    public function getDetailsJson(string $placeId, string $locale): array|bool|null
     {
         try {
             $details = file_get_contents(self::GOOGLE_PlACES_FILE . strtolower($placeId) . "_" . $locale .'.json');
@@ -46,10 +59,10 @@ class GooglePlaceService
      *
      * @param string $placeId
      * @param string $locale
-     * @return array
+     * @return array|null
      * @throws \JsonException
      */
-    public function getDetails(string $placeId, string $locale): array
+    public function getDetails(string $placeId, string $locale): ?array
     {
         $date = new \DateTime();
         $timestampFile = GoogleReviews::getConfigValue(GoogleReviews::GOOGLE_CACHE_FILE_TIMESTAMP . strtolower($placeId));

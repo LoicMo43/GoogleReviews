@@ -43,7 +43,10 @@ class GoogleApiService
             );
 
             if ($response->getStatusCode() === 200) {
-                return $response->toArray()['result'];
+                $data = $response->toArray();
+                if (isset($data['result'])) {
+                    return $data['result'];
+                }
             }
 
         } catch (TransportExceptionInterface|ClientExceptionInterface|DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface $e) {
